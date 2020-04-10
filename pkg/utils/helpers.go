@@ -2,6 +2,6 @@ package utils
 
 import "fmt"
 
-func logg(x interface{}) {
+func Logg(x interface{}) {
 	fmt.Printf("%+v\n", x)
 }

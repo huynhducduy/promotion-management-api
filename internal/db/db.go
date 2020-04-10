@@ -6,19 +6,20 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
+	"promotion-management-api/internal/config"
 )
 
 var db *sql.DB
 
-func openConnection() {
+func OpenConnection() {
 
-	conn, err := sql.Open("mysql", config.DB_USER+":"+config.DB_PASS+"@tcp("+config.DB_HOST+":"+config.DB_PORT+")/"+config.DB_NAME+"?parseTime=true")
+	conn, err := sql.Open("mysql", config.GetConfig().DB_USER+":"+config.GetConfig().DB_PASS+"@tcp("+config.GetConfig().DB_HOST+":"+config.GetConfig().DB_PORT+")/"+config.GetConfig().DB_NAME+"?parseTime=true")
 
 	if err != nil {
 		log.Fatalf("Cannot open connection, %s", err)
 	}
 
-	err = db.Ping()
+	err = conn.Ping()
 	if err != nil {
 		log.Fatalf("Cannot ping connection, %s", err)
 	}
@@ -31,6 +32,6 @@ func openConnection() {
 	db = conn
 }
 
-func getConnection() *sql.DB {
+func GetConnection() *sql.DB {
 	return db
 }

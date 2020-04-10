@@ -2,17 +2,22 @@ package app
 
 import (
 	"net/http"
+	//"promotion-management-api/pkg/utils"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	log "github.com/sirupsen/logrus"
 	"promotion-management-api/internal/config"
+	"promotion-management-api/internal/db"
+	"promotion-management-api/internal/promotion"
 )
 
 func Run() error {
 
 	config.ReadConfig()
+
+	db.OpenConnection()
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -33,6 +38,8 @@ func Run() error {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
 	})
+
+	r.Get("/api/v1/promotion", promotion.GetAll)
 
 	log.Printf("Running at port 80")
 	return http.ListenAndServe(":80", r)
