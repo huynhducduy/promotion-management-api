@@ -2,3 +2,17 @@
 ## explicit
 github.com/go-chi/chi
 github.com/go-chi/chi/middleware
+# github.com/go-sql-driver/mysql v1.5.0
+## explicit
+github.com/go-sql-driver/mysql
+# github.com/konsorten/go-windows-terminal-sequences v1.0.2
+## explicit
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/sirupsen/logrus v1.5.0
+## explicit
+github.com/sirupsen/logrus
+# golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
+## explicit
+# golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa
+## explicit
+golang.org/x/sys/unix
