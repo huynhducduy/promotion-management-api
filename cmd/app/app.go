@@ -1,11 +1,12 @@
 package app
 
 import (
-	"github.com/go-chi/cors"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
+	log "github.com/sirupsen/logrus"
 	"promotion-management-api/internal/config"
 )
 
@@ -25,7 +26,7 @@ func Run() error {
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
+		MaxAge:           300,
 	})
 	r.Use(cors.Handler)
 
@@ -33,5 +34,6 @@ func Run() error {
 		w.Write([]byte("welcome"))
 	})
 
+	log.Printf("Running at port 80")
 	return http.ListenAndServe(":80", r)
 }
