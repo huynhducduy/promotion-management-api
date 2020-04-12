@@ -5,7 +5,7 @@ import (
 )
 
 type Promotion struct {
-	Id            *int64   `json:"id"`
+	Id            *int64   `json:"id,omitempty"`
 	Name          *string  `json:"name"`
 	StartDate     *string  `json:"start_date"`
 	EndDate       *string  `json:"end_date"`

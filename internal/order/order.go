@@ -9,7 +9,7 @@ import (
 )
 
 type Order struct {
-	Id          *int64  `json:"id"`
+	Id          *int64  `json:"id,omitempty"`
 	StoreId     *int64  `json:"store_id"`
 	CashierId   *int64  `json:"cashier_id"`
 	MemberId    *int64  `json:"member_id"`
@@ -28,9 +28,9 @@ type ProductWithQuantity struct {
 
 type OrderExtra struct {
 	*Order
-	Member    *member.Member         `json:"member"`
+	Member    *member.Member         `json:"member,omitempty"`
 	Cashier   *employee.Employee     `json:"cashier"`
 	Store     *store.Store           `json:"store"`
-	Promotion *promotion.Promotion   `json:"promotion"`
+	Promotion *promotion.Promotion   `json:"promotion,omitempty"`
 	Product   *[]ProductWithQuantity `json:"product"`
 }
