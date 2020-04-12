@@ -219,10 +219,115 @@ func read(id int64) (*PromotionExtra, error) {
 	return &promotion, err
 }
 
-func update(id int64) error {
-	return nil
+func update(updatedPromo PromotionExtra) (*PromotionExtra, error) {
+	db := db.GetConnection()
+
+	_, err := db.Exec("UPDATE `promotion` SET `Name` = ?, `StartDate` = ?, `EndDate` = ?, `MainGoal` = ?, `ApplyingType` = ?, `ApplyingForm` = ?, `ApplyingValue` = ? WHERE `ID` = ?", updatedPromo.Name, updatedPromo.StartDate, updatedPromo.EndDate, updatedPromo.MainGoal, updatedPromo.ApplyingType, updatedPromo.ApplyingForm, updatedPromo.ApplyingValue, updatedPromo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("DELETE FROM `store_constraint` WHERE `PromotionID` = ?;", updatedPromo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("DELETE FROM `time_constraint` WHERE `PromotionID` = ?;", updatedPromo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("DELETE FROM `payment_constraint` WHERE `PromotionID` = ?;", updatedPromo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("DELETE FROM `membership_constraint` WHERE `PromotionID` = ?;", updatedPromo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("DELETE FROM `order_type_constraint` WHERE `PromotionID` = ?;", updatedPromo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if updatedPromo.Store != nil {
+		for _, i := range *updatedPromo.Store {
+			_, err := db.Exec("INSERT INTO `store_constraint` (`PromotionID`, `StoreID`) VALUES (?,?)", updatedPromo.Id, i.Id)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if updatedPromo.Payment != nil {
+		for _, i := range *updatedPromo.Payment {
+			_, err := db.Exec("INSERT INTO `payment_constraint` (`PromotionID`, `Type`) VALUES (?,?)", updatedPromo.Id, i)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if updatedPromo.Membership != nil {
+		for _, i := range *updatedPromo.Membership {
+			_, err := db.Exec("INSERT INTO `membership_constraint` (`PromotionID`, `Type`) VALUES (?,?)", updatedPromo.Id, i)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if updatedPromo.OrderType != nil {
+		for _, i := range *updatedPromo.OrderType {
+			_, err := db.Exec("INSERT INTO `order_type_constraint` (`PromotionID`, `Type`) VALUES (?,?)", updatedPromo.Id, i)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if updatedPromo.Time != nil {
+		for _, i := range *updatedPromo.Time {
+			_, err := db.Exec("INSERT INTO `time_constraint` (`PromotionID`, `Type`, `StartTime`, `EndTime`) VALUES (?,?,?,?)", updatedPromo.Id, i.Type, i.StartTime, i.EndTime)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &updatedPromo, nil
 }
 
 func delete(id int64) error {
-	return nil
+	db := db.GetConnection()
+
+	_, err := db.Exec("DELETE FROM `time_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM `store_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM `payment_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM `membership_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM `order_type_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM `promotion` WHERE `ID` = ?", id)
+	return err
 }

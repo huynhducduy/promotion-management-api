@@ -46,7 +46,6 @@ func Run() error {
 			r.Post("/", promotion.Create)
 
 			r.Route("/{id}", func(r chi.Router) {
-				r.Use(promotion.PromotionContext)
 				r.Get("/", promotion.Read)
 				r.Post("/", promotion.Update)
 				r.Delete("/", promotion.Delete)
