@@ -9,3 +9,6 @@ RUN go mod download
 EXPOSE 80
 
 ENTRYPOINT ["go","run","main.go"]
+
+# sudo docker build -t swd391 .
+# sudo docker run -dit -p 80:80 swd391:latest
