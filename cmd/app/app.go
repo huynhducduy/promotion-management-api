@@ -9,6 +9,7 @@ import (
 	"promotion-management-api/internal/auth"
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
+	"promotion-management-api/internal/employee"
 	"promotion-management-api/internal/order"
 	"promotion-management-api/internal/product"
 	"promotion-management-api/internal/promotion"
@@ -95,7 +96,7 @@ func Run() error {
 			r.Route("/employee", func(r chi.Router) {
 				r.Post("/login", auth.Login)
 
-				//r.Get("/", employee.RouterList)
+				r.Get("/", employee.RouterList)
 				//r.Post("/", employee.RouterCreate)
 				//
 				//r.Route("/{id}", func(r chi.Router) {
