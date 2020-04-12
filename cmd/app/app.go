@@ -49,26 +49,26 @@ func Run() error {
 			r.Use(auth.AuthenticationgMiddleware)
 
 			r.Route("/promotion", func(r chi.Router) {
-				r.Get("/", promotion.List)
-				r.Post("/", promotion.Create)
+				r.Get("/", promotion.RouterList)
+				r.Post("/", promotion.RouterCreate)
 
 				r.Route("/{id}", func(r chi.Router) {
-					r.Get("/", promotion.Read)
-					r.Post("/", promotion.Update)
-					r.Delete("/", promotion.Delete)
+					r.Get("/", promotion.RouterRead)
+					r.Post("/", promotion.RouterUpdate)
+					r.Delete("/", promotion.RouterDelete)
 				})
 			})
 
 			r.Route("/employee", func(r chi.Router) {
 				r.Post("/login", auth.Login)
 
-				//r.Get("/", employee.List)
-				//r.Post("/", employee.Create)
+				//r.Get("/", employee.RouterList)
+				//r.Post("/", employee.RouterCreate)
 				//
 				//r.Route("/{id}", func(r chi.Router) {
-				//	r.Get("/", employee.Read)
-				//	r.Post("/", employee.Update)
-				//	r.Delete("/", employee.Delete)
+				//	r.Get("/", employee.RouterRead)
+				//	r.Post("/", employee.RouterUpdate)
+				//	r.RouterDelete("/", employee.RouterDelete)
 				//})
 			})
 		})

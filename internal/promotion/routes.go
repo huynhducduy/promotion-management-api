@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func List(w http.ResponseWriter, r *http.Request) {
+func RouterList(w http.ResponseWriter, r *http.Request) {
 	data, err := list()
 	if err != nil {
 		utils.ResponseInternalError(w, err)
@@ -20,7 +20,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	utils.Response(w, 200, data)
 }
 
-func Create(w http.ResponseWriter, r *http.Request) {
+func RouterCreate(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -46,7 +46,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseCreated(w, id)
 }
 
-func Read(w http.ResponseWriter, r *http.Request) {
+func RouterRead(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -64,7 +64,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	utils.Response(w, http.StatusOK, promotion)
 }
 
-func Update(w http.ResponseWriter, r *http.Request) {
+func RouterUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		utils.ResponseMessage(w, http.StatusBadRequest, "Id must be an integer!")
@@ -96,7 +96,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	utils.Response(w, http.StatusOK, result)
 }
 
-func Delete(w http.ResponseWriter, r *http.Request) {
+func RouterDelete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		utils.ResponseMessage(w, http.StatusBadRequest, "Id must be an integer!")
@@ -109,5 +109,5 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ResponseMessage(w, http.StatusOK, "Delete succeed!")
+	utils.ResponseMessage(w, http.StatusOK, "RouterDelete succeed!")
 }
