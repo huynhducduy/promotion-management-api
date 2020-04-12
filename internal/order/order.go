@@ -18,7 +18,7 @@ type Order struct {
 	Total       *int64  `json:"total"`
 	PaymentType *string `json:"payment_type"`
 	Type        *string `json:"type"`
-	Discount    *string `json:"discount"`
+	Discount    *int64  `json:"discount"`
 }
 
 type ProductWithQuantity struct {

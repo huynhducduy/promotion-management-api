@@ -60,7 +60,6 @@ func RouterRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//promotion := r.Context().Value("promotion")
 	utils.Response(w, http.StatusOK, promotion)
 }
 

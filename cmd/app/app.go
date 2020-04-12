@@ -63,13 +63,13 @@ func Run() error {
 
 			r.Route("/order", func(r chi.Router) {
 				r.Get("/", order.RouterList)
-				//r.Post("/", order.RouterCreate)
+				r.Post("/", order.RouterCreate)
 				//
-				//r.Route("/{id}", func(r chi.Router) {
-				//	r.Get("/", order.RouterRead)
-				//	r.Post("/", order.RouterUpdate)
-				//	r.RouterDelete("/", order.RouterDelete)
-				//})
+				r.Route("/{id}", func(r chi.Router) {
+					r.Get("/", order.RouterRead)
+					//	r.Post("/", order.RouterUpdate)
+					//	r.RouterDelete("/", order.RouterDelete)
+				})
 			})
 
 			r.Route("/product", func(r chi.Router) {
