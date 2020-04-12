@@ -1,10 +1,13 @@
 package promotion
 
 import (
+	"database/sql"
+	"errors"
 	"promotion-management-api/internal/db"
+	"promotion-management-api/internal/store"
 )
 
-func getAll() ([]Promotion, error) {
+func list() ([]Promotion, error) {
 	db := db.GetConnection()
 
 	results, err := db.Query("SELECT `ID`, `Name`, `StartDate`, `EndDate`, `MainGoal`, `ApplyingType`, `ApplyingForm`, `ApplyingValue` FROM `promotion`")
@@ -30,7 +33,7 @@ func getAll() ([]Promotion, error) {
 	return promotions, nil
 }
 
-func insert(promotion PromotionWithConstrains) (int64, error) {
+func create(promotion PromotionExtra) (int64, error) {
 	db := db.GetConnection()
 
 	results, err := db.Exec("INSERT INTO `promotion` (`Name`, `StartDate`, `EndDate`, `MainGoal`, `ApplyingType`, `ApplyingForm`, `ApplyingValue`) VALUES (?,?,?,?,?,?,?)", promotion.Name, promotion.StartDate, promotion.EndDate, promotion.MainGoal, promotion.ApplyingType, promotion.ApplyingForm, promotion.ApplyingValue)
@@ -91,6 +94,135 @@ func insert(promotion PromotionWithConstrains) (int64, error) {
 	return lid, nil
 }
 
-func getOne(id int) (PromotionWithConstrains, error) {
+func read(id int64) (*PromotionExtra, error) {
 
+	promotion := PromotionExtra{}
+	promotion.Promotion = new(Promotion)
+	promotion.Store = new([]store.Store)
+	promotion.Time = new([]Time)
+
+	db := db.GetConnection()
+
+	results := db.QueryRow("SELECT `ID`, `Name`, `StartDate`, `EndDate`, `MainGoal`, `ApplyingType`, `ApplyingForm`, `ApplyingValue` FROM `promotion` WHERE `id` = ? ", id)
+	err := results.Scan(&promotion.Id, &promotion.Name, &promotion.StartDate, &promotion.EndDate, &promotion.MainGoal, &promotion.ApplyingType, &promotion.ApplyingForm, &promotion.ApplyingValue)
+	if err == sql.ErrNoRows {
+		return nil, errors.New("Invalid id.")
+	} else if err != nil {
+		return nil, err
+	}
+
+	results2, err := db.Query("SELECT `ID`, `Name`, `ManagerID`, `Address` FROM `store` WHERE `ID` IN (SELECT `StoreID` FROM `store_constraint` WHERE `PromotionID` = ?)", id)
+	if err != nil {
+		return nil, err
+	}
+	defer results2.Close()
+
+	stores := make([]store.Store, 0)
+
+	for results2.Next() {
+		var store store.Store
+
+		err = results2.Scan(&store.Id, &store.Name, &store.ManagerID, &store.Address)
+		if err != nil {
+			return nil, err
+		}
+
+		stores = append(stores, store)
+	}
+
+	promotion.Store = &stores
+
+	results2, err = db.Query("SELECT `Type` FROM `payment_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer results2.Close()
+
+	payments := make([]string, 0)
+
+	for results2.Next() {
+		var payment string
+
+		err = results2.Scan(&payment)
+		if err != nil {
+			return nil, err
+		}
+
+		payments = append(payments, payment)
+	}
+
+	promotion.Payment = &payments
+
+	results2, err = db.Query("SELECT `Type`, `StartTime`, `EndTime` FROM `time_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer results2.Close()
+
+	times := make([]Time, 0)
+
+	for results2.Next() {
+		var time Time
+
+		err = results2.Scan(&time.Type, &time.StartTime, &time.EndTime)
+		if err != nil {
+			return nil, err
+		}
+
+		times = append(times, time)
+	}
+
+	promotion.Time = &times
+
+	results2, err = db.Query("SELECT `Type` FROM `order_type_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer results2.Close()
+
+	orderTypes := make([]string, 0)
+
+	for results2.Next() {
+		var orderType string
+
+		err = results2.Scan(&orderType)
+		if err != nil {
+			return nil, err
+		}
+
+		orderTypes = append(orderTypes, orderType)
+	}
+
+	promotion.OrderType = &orderTypes
+
+	results2, err = db.Query("SELECT `Type` FROM `membership_constraint` WHERE `PromotionID` = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer results2.Close()
+
+	memberships := make([]string, 0)
+
+	for results2.Next() {
+		var membership string
+
+		err = results2.Scan(&membership)
+		if err != nil {
+			return nil, err
+		}
+
+		memberships = append(memberships, membership)
+	}
+
+	promotion.Membership = &memberships
+
+	return &promotion, err
+}
+
+func update(id int64) error {
+	return nil
+}
+
+func delete(id int64) error {
+	return nil
 }
