@@ -12,6 +12,7 @@ import (
 	"promotion-management-api/internal/order"
 	"promotion-management-api/internal/product"
 	"promotion-management-api/internal/promotion"
+	"promotion-management-api/internal/store"
 )
 
 func Run() error {
@@ -81,7 +82,7 @@ func Run() error {
 			})
 
 			r.Route("/store", func(r chi.Router) {
-				//r.Get("/", store.RouterList)
+				r.Get("/", store.RouterList)
 				//r.Post("/", store.RouterCreate)
 				//
 				//r.Route("/{id}", func(r chi.Router) {
