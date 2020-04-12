@@ -2,6 +2,8 @@ package app
 
 import (
 	"net/http"
+	"promotion-management-api/internal/promotion"
+
 	//"promotion-management-api/pkg/utils"
 
 	"github.com/go-chi/chi"
@@ -10,7 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
-	"promotion-management-api/internal/promotion"
 )
 
 func Run() error {
@@ -39,7 +40,13 @@ func Run() error {
 		w.Write([]byte("welcome"))
 	})
 
-	r.Get("/api/v1/promotion", promotion.GetAll)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Route("/promotion", func(r chi.Router) {
+			r.Get("/", promotion.List)
+			r.Post("/", promotion.Create)
+			r.Get("/{id}", promotion.Read)
+		})
+	})
 
 	log.Printf("Running at port 80")
 	return http.ListenAndServe(":80", r)

@@ -9,5 +9,5 @@ type Order struct {
 	CreatedTime *string `json:"created_time"`
 	Total       *int64  `json:"total"`
 	PaymentType *string `json:"payment_type"`
-	OrderType   *string `json:"order_type"`
+	Type        *string `json:"type"`
 }
