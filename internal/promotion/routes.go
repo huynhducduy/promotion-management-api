@@ -110,3 +110,7 @@ func RouterDelete(w http.ResponseWriter, r *http.Request) {
 
 	utils.ResponseMessage(w, http.StatusOK, "RouterDelete succeed!")
 }
+
+func RouterApplicable(w http.ResponseWriter, r *http.Request) {
+
+}

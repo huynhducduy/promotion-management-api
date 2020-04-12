@@ -59,6 +59,8 @@ func Run() error {
 					r.Post("/", promotion.RouterUpdate)
 					r.Delete("/", promotion.RouterDelete)
 				})
+
+				r.Get("/applicable", promotion.RouterApplicable)
 			})
 
 			r.Route("/order", func(r chi.Router) {

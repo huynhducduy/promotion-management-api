@@ -219,6 +219,10 @@ func Read(id int64) (*PromotionExtra, error) {
 	return &promotion, err
 }
 
+func Applicable(store_id int64, member_id int64, payment_type string, order_type string) {
+
+}
+
 func Update(updatedPromo PromotionExtra) (*PromotionExtra, error) {
 	db := db.GetConnection()
 
