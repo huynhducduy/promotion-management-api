@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	log "github.com/sirupsen/logrus"
+	"promotion-management-api/internal/auth"
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
 )
@@ -41,14 +42,34 @@ func Run() error {
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Route("/promotion", func(r chi.Router) {
-			r.Get("/", promotion.List)
-			r.Post("/", promotion.Create)
+		r.Get("/", auth.GetPwd)
 
-			r.Route("/{id}", func(r chi.Router) {
-				r.Get("/", promotion.Read)
-				r.Post("/", promotion.Update)
-				r.Delete("/", promotion.Delete)
+		r.Route("/", func(r chi.Router) {
+
+			r.Use(auth.AuthenticationgMiddleware)
+
+			r.Route("/promotion", func(r chi.Router) {
+				r.Get("/", promotion.List)
+				r.Post("/", promotion.Create)
+
+				r.Route("/{id}", func(r chi.Router) {
+					r.Get("/", promotion.Read)
+					r.Post("/", promotion.Update)
+					r.Delete("/", promotion.Delete)
+				})
+			})
+
+			r.Route("/employee", func(r chi.Router) {
+				r.Post("/login", auth.Login)
+
+				//r.Get("/", employee.List)
+				//r.Post("/", employee.Create)
+				//
+				//r.Route("/{id}", func(r chi.Router) {
+				//	r.Get("/", employee.Read)
+				//	r.Post("/", employee.Update)
+				//	r.Delete("/", employee.Delete)
+				//})
 			})
 		})
 	})

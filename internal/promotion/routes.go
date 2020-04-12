@@ -10,25 +10,6 @@ import (
 	"time"
 )
 
-//func PromotionContext(next http.Handler) http.Handler {
-//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-//		if err != nil {
-//			utils.ResponseMessage(w, http.StatusBadRequest, "Id must be an integer!")
-//			return
-//		}
-//
-//		promotion, err := read(id)
-//		if err != nil {
-//			utils.ResponseInternalError(w, err)
-//			return
-//		}
-//
-//		ctx := context.WithValue(r.Context(), "promotion", promotion)
-//		next.ServeHTTP(w, r.WithContext(ctx))
-//	})
-//}
-
 func List(w http.ResponseWriter, r *http.Request) {
 	data, err := list()
 	if err != nil {

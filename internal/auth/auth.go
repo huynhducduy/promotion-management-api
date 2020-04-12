@@ -1,16 +1,21 @@
-package app
+package auth
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"promotion-management-api/internal/employee"
 	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"promotion-management-api/internal/config"
+	"promotion-management-api/internal/db"
 	"promotion-management-api/pkg/utils"
 )
 
@@ -19,7 +24,7 @@ type Credential struct {
 	Password string `json:"password"`
 }
 type Claims struct {
-	Id        int
+	Id        int64
 	ExpiresAt int64
 	jwt.StandardClaims
 }
@@ -37,41 +42,12 @@ func getToken(r *http.Request) (string, error) {
 	}
 }
 
-func isAuthenticated(endpoint func(http.ResponseWriter, *http.Request, User)) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		user_token, err := getToken(r)
-		if err != nil {
-			utils.Response(w, http.StatusUnauthorized, err.Error())
-			return
-		}
-
-		token, err := jwt.ParseWithClaims(user_token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.GetConfig().SECRET), nil
-		})
-
-		if err == nil && token.Valid {
-			var user *User
-			user, err = getOneUser(token.Claims.(*Claims).Id)
-			if err != nil {
-				utils.ResponseInternalError(w, err)
-				return
-			}
-
-			endpoint(w, r, *user)
-			return
-		}
-
-		utils.ResponseMessage(w, http.StatusUnauthorized, "Invalid token!")
-	}
-}
-
-func generateToken(id int) Token {
+func generateToken(id int64) Token {
 	expAt := time.Now().Unix() + 604800 // 1 week
 
 	payload := Claims{Id: id, ExpiresAt: expAt}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), payload)
-	tokenString, _ := token.SignedString([]byte(config.SECRET))
+	tokenString, _ := token.SignedString([]byte(config.GetConfig().SECRET))
 
 	return Token{
 		Token:     tokenString,
@@ -79,7 +55,55 @@ func generateToken(id int) Token {
 	}
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
+func hashAndSalt(pwd string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)
+	if err != nil {
+		log.Println(err)
+	}
+	return string(hash)
+}
+
+func comparePasswords(hashed string, plain string) bool {
+	byteHashed := []byte(hashed)
+	bytePlain := []byte(plain)
+	err := bcrypt.CompareHashAndPassword(byteHashed, bytePlain)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func AuthenticationgMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		empToken, err := getToken(r)
+		if err != nil {
+			utils.ResponseMessage(w, http.StatusUnauthorized, err.Error())
+			return
+		}
+
+		token, err := jwt.ParseWithClaims(empToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.GetConfig().SECRET), nil
+		})
+
+		if err == nil && token.Valid {
+			var emp *employee.Employee
+			emp, err = employee.Read(token.Claims.(*Claims).Id)
+			if err != nil {
+				utils.ResponseInternalError(w, err)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), "employee", emp)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		utils.ResponseMessage(w, http.StatusUnauthorized, "Invalid token!")
+	})
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -95,19 +119,30 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var id int
+	var id int64
+	var pass string
+	db := db.GetConnection()
 
-	results := db.QueryRow("SELECT `id` FROM `users` where `username` = ? AND `password` = ?", credential.Username, credential.Password)
-	err = results.Scan(&id)
+	results := db.QueryRow("SELECT `ID`, `Password` FROM `employee` where `username` = ?", credential.Username)
+	err = results.Scan(&id, &pass)
 	if err == sql.ErrNoRows {
-		utils.ResponseMessage(w, http.StatusNotFound, "Username and passowrd is incorrect!")
+		utils.ResponseMessage(w, http.StatusNotFound, "Username and passoword is incorrect!")
 		return
 	} else if err != nil {
 		utils.ResponseInternalError(w, err)
 		return
 	}
 
+	if !comparePasswords(pass, credential.Password) {
+		utils.ResponseMessage(w, http.StatusNotFound, "Username and passoword is incorrect!")
+		return
+	}
+
 	token := generateToken(id)
 
 	utils.Response(w, http.StatusOK, token)
+}
+
+func GetPwd(w http.ResponseWriter, r *http.Request) {
+	utils.ResponseMessage(w, 200, hashAndSalt("password123"))
 }
