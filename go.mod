@@ -7,13 +7,11 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-chi/chi v4.1.0+incompatible
 	github.com/go-chi/cors v1.0.1
-	github.com/go-chi/jwtauth v4.0.4+incompatible // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/json-iterator/go v1.1.9
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/afero v1.2.2 // indirect

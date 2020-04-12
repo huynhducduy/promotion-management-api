@@ -21,7 +21,7 @@ type Time struct {
 	EndTime   *string `json:"end_time"`
 }
 
-type PromotionWithConstrains struct {
+type PromotionExtra struct {
 	*Promotion
 	Store      *[]store.Store `json:"store_constraint"`
 	Payment    *[]string      `json:"payment_constraint"`

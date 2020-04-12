@@ -11,8 +11,6 @@ github.com/go-chi/chi/middleware
 # github.com/go-chi/cors v1.0.1
 ## explicit
 github.com/go-chi/cors
-# github.com/go-chi/jwtauth v4.0.4+incompatible
-## explicit
 # github.com/go-sql-driver/mysql v1.5.0
 ## explicit
 github.com/go-sql-driver/mysql
@@ -42,7 +40,6 @@ github.com/mitchellh/mapstructure
 ## explicit
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
-## explicit
 github.com/modern-go/reflect2
 # github.com/pelletier/go-toml v1.7.0
 ## explicit
