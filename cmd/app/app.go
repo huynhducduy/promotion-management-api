@@ -10,6 +10,7 @@ import (
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
 	"promotion-management-api/internal/order"
+	"promotion-management-api/internal/product"
 	"promotion-management-api/internal/promotion"
 )
 
@@ -59,12 +60,34 @@ func Run() error {
 
 			r.Route("/order", func(r chi.Router) {
 				r.Get("/", order.RouterList)
-				//r.Post("/", employee.RouterCreate)
+				//r.Post("/", order.RouterCreate)
 				//
 				//r.Route("/{id}", func(r chi.Router) {
-				//	r.Get("/", employee.RouterRead)
-				//	r.Post("/", employee.RouterUpdate)
-				//	r.RouterDelete("/", employee.RouterDelete)
+				//	r.Get("/", order.RouterRead)
+				//	r.Post("/", order.RouterUpdate)
+				//	r.RouterDelete("/", order.RouterDelete)
+				//})
+			})
+
+			r.Route("/product", func(r chi.Router) {
+				r.Get("/", product.RouterList)
+				//r.Post("/", product.RouterCreate)
+				//
+				//r.Route("/{id}", func(r chi.Router) {
+				//	r.Get("/", product.RouterRead)
+				//	r.Post("/", product.RouterUpdate)
+				//	r.RouterDelete("/", product.RouterDelete)
+				//})
+			})
+
+			r.Route("/store", func(r chi.Router) {
+				//r.Get("/", store.RouterList)
+				//r.Post("/", store.RouterCreate)
+				//
+				//r.Route("/{id}", func(r chi.Router) {
+				//	r.Get("/", store.RouterRead)
+				//	r.Post("/", store.RouterUpdate)
+				//	r.RouterDelete("/", store.RouterDelete)
 				//})
 			})
 
@@ -78,6 +101,17 @@ func Run() error {
 				//	r.Get("/", employee.RouterRead)
 				//	r.Post("/", employee.RouterUpdate)
 				//	r.RouterDelete("/", employee.RouterDelete)
+				//})
+			})
+
+			r.Route("/member", func(r chi.Router) {
+				//r.Get("/", member.RouterList)
+				//r.Post("/", member.RouterCreate)
+				//
+				//r.Route("/{id}", func(r chi.Router) {
+				//	r.Get("/", member.RouterRead)
+				//	r.Post("/", member.RouterUpdate)
+				//	r.RouterDelete("/", member.RouterDelete)
 				//})
 			})
 		})
