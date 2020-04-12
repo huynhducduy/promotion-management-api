@@ -10,6 +10,7 @@ import (
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
 	"promotion-management-api/internal/employee"
+	"promotion-management-api/internal/member"
 	"promotion-management-api/internal/order"
 	"promotion-management-api/internal/product"
 	"promotion-management-api/internal/promotion"
@@ -107,7 +108,7 @@ func Run() error {
 			})
 
 			r.Route("/member", func(r chi.Router) {
-				//r.Get("/", member.RouterList)
+				r.Get("/", member.RouterList)
 				//r.Post("/", member.RouterCreate)
 				//
 				//r.Route("/{id}", func(r chi.Router) {
