@@ -11,7 +11,7 @@ import (
 )
 
 func RouterList(w http.ResponseWriter, r *http.Request) {
-	data, err := list()
+	data, err := List()
 	if err != nil {
 		utils.ResponseInternalError(w, err)
 		return
@@ -37,7 +37,7 @@ func RouterCreate(w http.ResponseWriter, r *http.Request) {
 	t, _ = time.Parse("02/01/2006", *newPromo.EndDate)
 	*newPromo.EndDate = t.Format("2006-01-02")
 
-	id, err := create(newPromo)
+	id, err := Create(newPromo)
 	if err != nil {
 		utils.ResponseInternalError(w, err)
 		return
@@ -54,7 +54,7 @@ func RouterRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	promotion, err := read(id)
+	promotion, err := Read(id)
 	if err != nil {
 		utils.ResponseInternalError(w, err)
 		return
@@ -87,7 +87,7 @@ func RouterUpdate(w http.ResponseWriter, r *http.Request) {
 	t, _ = time.Parse("02/01/2006", *updatedPromo.EndDate)
 	*updatedPromo.EndDate = t.Format("2006-01-02")
 
-	result, err := update(updatedPromo)
+	result, err := Update(updatedPromo)
 	if err != nil {
 		utils.ResponseInternalError(w, err)
 		return
@@ -103,7 +103,7 @@ func RouterDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = delete(id)
+	err = Delete(id)
 	if err != nil {
 		utils.ResponseInternalError(w, err)
 		return

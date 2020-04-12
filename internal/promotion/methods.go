@@ -7,7 +7,7 @@ import (
 	"promotion-management-api/internal/store"
 )
 
-func list() ([]Promotion, error) {
+func List() ([]Promotion, error) {
 	db := db.GetConnection()
 
 	results, err := db.Query("SELECT `ID`, `Name`, `StartDate`, `EndDate`, `MainGoal`, `ApplyingType`, `ApplyingForm`, `ApplyingValue` FROM `promotion`")
@@ -33,7 +33,7 @@ func list() ([]Promotion, error) {
 	return promotions, nil
 }
 
-func create(promotion PromotionExtra) (int64, error) {
+func Create(promotion PromotionExtra) (int64, error) {
 	db := db.GetConnection()
 
 	results, err := db.Exec("INSERT INTO `promotion` (`Name`, `StartDate`, `EndDate`, `MainGoal`, `ApplyingType`, `ApplyingForm`, `ApplyingValue`) VALUES (?,?,?,?,?,?,?)", promotion.Name, promotion.StartDate, promotion.EndDate, promotion.MainGoal, promotion.ApplyingType, promotion.ApplyingForm, promotion.ApplyingValue)
@@ -94,7 +94,7 @@ func create(promotion PromotionExtra) (int64, error) {
 	return lid, nil
 }
 
-func read(id int64) (*PromotionExtra, error) {
+func Read(id int64) (*PromotionExtra, error) {
 
 	promotion := PromotionExtra{}
 	promotion.Promotion = new(Promotion)
@@ -219,7 +219,7 @@ func read(id int64) (*PromotionExtra, error) {
 	return &promotion, err
 }
 
-func update(updatedPromo PromotionExtra) (*PromotionExtra, error) {
+func Update(updatedPromo PromotionExtra) (*PromotionExtra, error) {
 	db := db.GetConnection()
 
 	_, err := db.Exec("UPDATE `promotion` SET `Name` = ?, `StartDate` = ?, `EndDate` = ?, `MainGoal` = ?, `ApplyingType` = ?, `ApplyingForm` = ?, `ApplyingValue` = ? WHERE `ID` = ?", updatedPromo.Name, updatedPromo.StartDate, updatedPromo.EndDate, updatedPromo.MainGoal, updatedPromo.ApplyingType, updatedPromo.ApplyingForm, updatedPromo.ApplyingValue, updatedPromo.Id)
@@ -300,7 +300,7 @@ func update(updatedPromo PromotionExtra) (*PromotionExtra, error) {
 	return &updatedPromo, nil
 }
 
-func delete(id int64) error {
+func Delete(id int64) error {
 	db := db.GetConnection()
 
 	_, err := db.Exec("DELETE FROM `time_constraint` WHERE `PromotionID` = ?", id)

@@ -1,18 +1,16 @@
 package app
 
 import (
-	"net/http"
-	"promotion-management-api/internal/promotion"
-
-	//"promotion-management-api/pkg/utils"
-
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"promotion-management-api/internal/auth"
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
+	"promotion-management-api/internal/order"
+	"promotion-management-api/internal/promotion"
 )
 
 func Run() error {
@@ -57,6 +55,17 @@ func Run() error {
 					r.Post("/", promotion.RouterUpdate)
 					r.Delete("/", promotion.RouterDelete)
 				})
+			})
+
+			r.Route("/order", func(r chi.Router) {
+				r.Get("/", order.RouterList)
+				//r.Post("/", employee.RouterCreate)
+				//
+				//r.Route("/{id}", func(r chi.Router) {
+				//	r.Get("/", employee.RouterRead)
+				//	r.Post("/", employee.RouterUpdate)
+				//	r.RouterDelete("/", employee.RouterDelete)
+				//})
 			})
 
 			r.Route("/employee", func(r chi.Router) {
