@@ -59,15 +59,23 @@ func Create(order OrderExtra) (int64, error) {
 		}
 	}
 
-	if order.PromotionId != nil && order.MemberId != nil {
-		var applyingValue float64
-		results := db.QueryRow("SELECT `ApplyingValue` FROM `promotion` WHERE `ID` = ? AND `ApplyingForm` = \"Customer point\"", order.PromotionId)
-		err := results.Scan(&applyingValue)
-		if err != sql.ErrNoRows && err != nil {
-			return 0, err
+	if order.MemberId != nil {
+		point := *order.Total / 10000
+
+		if order.PromotionId != nil {
+			var applyingValue float64
+			results := db.QueryRow("SELECT `ApplyingValue` FROM `promotion` WHERE `ID` = ? AND `ApplyingForm` = \"Customer point\"", order.PromotionId)
+			err := results.Scan(&applyingValue)
+			if err != sql.ErrNoRows && err != nil {
+				return 0, err
+			}
+
+			if applyingValue != 0 {
+				point -= *order.Discount / int64(applyingValue*1000)
+			}
 		}
 
-		_, err = db.Exec("UPDATE `member` SET `point` = `point` + ?", *order.Total/10000-*order.Discount/int64(applyingValue*1000))
+		_, err = db.Exec("UPDATE `member` SET `point` = `point` + ?", point)
 		if err != nil {
 			return 0, err
 		}
