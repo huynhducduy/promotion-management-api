@@ -45,6 +45,7 @@ func Run() error {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/", auth.GetPwd)
+		r.Post("/login", auth.Login)
 
 		r.Route("/", func(r chi.Router) {
 
@@ -97,8 +98,6 @@ func Run() error {
 			})
 
 			r.Route("/employee", func(r chi.Router) {
-				r.Post("/login", auth.Login)
-
 				r.Get("/", employee.RouterList)
 				//r.Post("/", employee.RouterCreate)
 				//
