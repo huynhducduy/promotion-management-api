@@ -5,6 +5,8 @@ import (
 	"errors"
 	"promotion-management-api/internal/db"
 	"promotion-management-api/internal/store"
+	"promotion-management-api/pkg/utils"
+	"time"
 )
 
 func List() ([]Promotion, error) {
@@ -219,8 +221,252 @@ func Read(id int64) (*PromotionExtra, error) {
 	return &promotion, err
 }
 
-func Applicable(store_id int64, member_id int64, payment_type string, order_type string) {
+func Applicable(storeId int64, memberId int64, paymentType string, orderType string) ([]Promotion, error) {
+	promotions := make([]Promotion, 0)
 
+	db := db.GetConnection()
+
+	// Check Store -----------------------------------------------------------------------------------------------------
+	promoIds := make([]interface{}, 0)
+
+	results, err := db.Query("SELECT DISTINCT `PromotionID` FROM `store_constraint` WHERE `StoreID` = ? OR `StoreID` = \"0\"", storeId)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	for results.Next() {
+		var promoId string
+		err = results.Scan(&promoId)
+		if err != nil {
+			return nil, err
+		}
+		promoIds = append(promoIds, promoId)
+	}
+
+	utils.Logg("After store")
+	utils.Logg(promoIds)
+
+	if len(promoIds) == 0 {
+		return promotions, nil
+	}
+
+	// Check Payment ---------------------------------------------------------------------------------------------------
+	var queryString string
+	var stuffs []interface{}
+
+	stuffs = append(stuffs, promoIds...)
+	queryString = "SELECT DISTINCT `PromotionID` FROM `payment_constraint` WHERE `PromotionID` IN (?"
+
+	for i := 1; i <= len(promoIds)-1; i++ {
+		queryString += ",?"
+	}
+
+	queryString += ") AND (`Type` = ? OR `Type` = \"0\")"
+
+	stuffs = append(stuffs, paymentType)
+
+	results, err = db.Query(queryString, stuffs...)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	promoIds = make([]interface{}, 0)
+
+	for results.Next() {
+		var promoId string
+		err = results.Scan(&promoId)
+		if err != nil {
+			return nil, err
+		}
+		promoIds = append(promoIds, promoId)
+	}
+
+	utils.Logg("After payment")
+	utils.Logg(promoIds)
+	if len(promoIds) == 0 {
+		return promotions, nil
+	}
+
+	// Check Order Type ------------------------------------------------------------------------------------------------
+
+	queryString = ""
+	stuffs = make([]interface{}, 0)
+
+	stuffs = append(stuffs, promoIds...)
+	queryString = "SELECT DISTINCT `PromotionID` FROM `order_type_constraint` WHERE `PromotionID` IN (?"
+
+	for i := 1; i <= len(promoIds)-1; i++ {
+		queryString += ",?"
+	}
+
+	queryString += ") AND (`Type` = ? OR `Type` = \"0\")"
+
+	stuffs = append(stuffs, orderType)
+
+	results, err = db.Query(queryString, stuffs...)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	promoIds = make([]interface{}, 0)
+
+	for results.Next() {
+		var promoId string
+		err = results.Scan(&promoId)
+		if err != nil {
+			return nil, err
+		}
+		promoIds = append(promoIds, promoId)
+	}
+
+	utils.Logg("After order type")
+	utils.Logg(promoIds)
+	if len(promoIds) == 0 {
+		return promotions, nil
+	}
+
+	// Check time------------------------------------------------------------------------------------===----------------
+
+	now := time.Now()
+	hour := now.Hour()
+	dayOfWeek := int(now.Weekday())
+
+	queryString = ""
+	stuffs = make([]interface{}, 0)
+
+	stuffs = append(stuffs, promoIds...)
+	queryString = "SELECT DISTINCT `PromotionID` FROM `time_constraint` WHERE `PromotionID` IN (?"
+
+	for i := 1; i <= len(promoIds)-1; i++ {
+		queryString += ",?"
+	}
+
+	queryString += ") AND ((`Type` = \"Hour\" AND `StartTime` <= ? AND `EndTime` >= ?) OR (`Type` = \"DayOfWeek\" AND `StartTime` <= ? AND `EndTime` >= ?) OR `Type` = \"0\")"
+
+	stuffs = append(stuffs, hour, hour, dayOfWeek, dayOfWeek)
+
+	results, err = db.Query(queryString, stuffs...)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	promoIds = make([]interface{}, 0)
+
+	for results.Next() {
+		var promoId string
+		err = results.Scan(&promoId)
+		if err != nil {
+			return nil, err
+		}
+		promoIds = append(promoIds, promoId)
+	}
+
+	utils.Logg("After time")
+	utils.Logg(promoIds)
+	if len(promoIds) == 0 {
+		return promotions, nil
+	}
+
+	// Check membership -----------------------------------------------------------------------------===----------------
+
+	var birthdate time.Time
+	var point int64
+
+	results2 := db.QueryRow("SELECT `Birthdate`, `Point` FROM `member` WHERE `ID` = ?", memberId)
+	err = results2.Scan(&birthdate, &point)
+	if err == sql.ErrNoRows {
+		return nil, errors.New("Invalid member id.")
+	} else if err != nil {
+		return nil, err
+	}
+
+	bd := false
+	pt := false
+
+	if birthdate.Day() == now.Day() && birthdate.Month() == now.Month() {
+		bd = true
+	}
+
+	if point >= 10 {
+		pt = true
+	}
+
+	queryString = ""
+	stuffs = make([]interface{}, 0)
+
+	stuffs = append(stuffs, promoIds...)
+	queryString = "SELECT DISTINCT `PromotionID` FROM `membership_constraint` WHERE `PromotionID` IN (?"
+
+	for i := 1; i <= len(promoIds)-1; i++ {
+		queryString += ",?"
+	}
+
+	queryString += ")"
+
+	if bd && pt {
+		queryString += " AND `Type` IN (\"Birthday\", \"Point\", \"0\")"
+	} else if bd {
+		queryString += " AND `Type` IN (\"Birthday\", \"0\")"
+	} else if pt {
+		queryString += " AND `Type` IN (\"Point\", \"0\")"
+	}
+
+	results, err = db.Query(queryString, stuffs...)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	promoIds = make([]interface{}, 0)
+
+	for results.Next() {
+		var promoId string
+		err = results.Scan(&promoId)
+		if err != nil {
+			return nil, err
+		}
+		promoIds = append(promoIds, promoId)
+	}
+
+	utils.Logg("After membership")
+	utils.Logg(promoIds)
+	if len(promoIds) == 0 {
+		return promotions, nil
+	}
+
+	// Get promotion -----------------------------------------------------------------------------===-------------------
+
+	queryString = "SELECT `ID`, `Name`, `StartDate`, `EndDate`, `MainGoal`, `ApplyingType`, `ApplyingForm`, `ApplyingValue` FROM `promotion`  WHERE `StartDate` <= CURDATE() AND `EndDate` >= CURDATE() AND `ID` IN (?"
+
+	for i := 1; i <= len(promoIds)-1; i++ {
+		queryString += ",?"
+	}
+
+	queryString += ")"
+
+	results, err = db.Query(queryString, promoIds...)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	for results.Next() {
+		var promotion Promotion
+
+		err = results.Scan(&promotion.Id, &promotion.Name, &promotion.StartDate, &promotion.EndDate, &promotion.MainGoal, &promotion.ApplyingType, &promotion.ApplyingForm, &promotion.ApplyingValue)
+		if err != nil {
+			return nil, err
+		}
+
+		promotions = append(promotions, promotion)
+
+	}
+
+	return promotions, nil
 }
 
 func Update(updatedPromo PromotionExtra) (*PromotionExtra, error) {
