@@ -29,7 +29,7 @@ func Run() error {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	cors := cors.New(cors.Options{
+	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
@@ -37,11 +37,7 @@ func Run() error {
 		AllowCredentials: true,
 		MaxAge:           300,
 	})
-	r.Use(cors.Handler)
-
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+	r.Use(c.Handler)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/", auth.GetPwd)
@@ -49,7 +45,7 @@ func Run() error {
 
 		r.Route("/", func(r chi.Router) {
 
-			r.Use(auth.AuthenticationgMiddleware)
+			r.Use(auth.AuthenticationMiddleware)
 
 			r.Route("/promotion", func(r chi.Router) {
 				r.Get("/", promotion.RouterList)
