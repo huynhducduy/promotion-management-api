@@ -108,9 +108,30 @@ func RouterDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ResponseMessage(w, http.StatusOK, "RouterDelete succeed!")
+	utils.ResponseMessage(w, http.StatusOK, "Delete succeed!")
 }
 
 func RouterApplicable(w http.ResponseWriter, r *http.Request) {
+	storeId, err := strconv.ParseInt(r.URL.Query().Get("store_id"), 10, 64)
+	if err != nil {
+		utils.ResponseMessage(w, http.StatusBadRequest, "Store id must be an integer!")
+		return
+	}
 
+	memberId, err := strconv.ParseInt(r.URL.Query().Get("member_id"), 10, 64)
+	if err != nil {
+		utils.ResponseMessage(w, http.StatusBadRequest, "Member id must be an integer!")
+		return
+	}
+
+	paymentType := r.URL.Query().Get("payment_type")
+	orderType := r.URL.Query().Get("order_type")
+
+	promotions, err := Applicable(storeId, memberId, paymentType, orderType)
+	if err != nil {
+		utils.ResponseInternalError(w, err)
+		return
+	}
+
+	utils.Response(w, http.StatusOK, promotions)
 }

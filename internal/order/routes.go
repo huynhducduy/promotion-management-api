@@ -59,3 +59,19 @@ func RouterRead(w http.ResponseWriter, r *http.Request) {
 
 	utils.Response(w, http.StatusOK, order)
 }
+
+func RouterDelete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		utils.ResponseMessage(w, http.StatusBadRequest, "Id must be an integer!")
+		return
+	}
+
+	err = Delete(id)
+	if err != nil {
+		utils.ResponseInternalError(w, err)
+		return
+	}
+
+	utils.ResponseMessage(w, http.StatusOK, "Delete succeed!")
+}

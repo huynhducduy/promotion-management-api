@@ -167,3 +167,15 @@ func Read(id int64) (*OrderExtra, error) {
 
 	return &order, err
 }
+
+func Delete(id int64) error {
+	db := db.GetConnection()
+
+	_, err := db.Exec("DELETE FROM `product_of_order` WHERE `OrderID` = ?", id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM `order` WHERE `ID` = ?", id)
+	return err
+}
