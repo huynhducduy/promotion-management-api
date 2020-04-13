@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"promotion-management-api/internal/config"
 	"promotion-management-api/internal/db"
 	"promotion-management-api/pkg/utils"
@@ -73,7 +73,7 @@ func comparePasswords(hashed string, plain string) bool {
 	return true
 }
 
-func AuthenticationgMiddleware(next http.Handler) http.Handler {
+func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		empToken, err := getToken(r)
@@ -126,7 +126,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	results := db.QueryRow("SELECT `ID`, `Password` FROM `employee` where `username` = ?", credential.Username)
 	err = results.Scan(&id, &pass)
 	if err == sql.ErrNoRows {
-		utils.ResponseMessage(w, http.StatusNotFound, "Username and passoword is incorrect!")
+		utils.ResponseMessage(w, http.StatusNotFound, "Username and password is incorrect!")
 		return
 	} else if err != nil {
 		utils.ResponseInternalError(w, err)
@@ -134,7 +134,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !comparePasswords(pass, credential.Password) {
-		utils.ResponseMessage(w, http.StatusNotFound, "Username and passoword is incorrect!")
+		utils.ResponseMessage(w, http.StatusNotFound, "Username and password is incorrect!")
 		return
 	}
 
