@@ -56,7 +56,7 @@ func Run() error {
 
 				r.Route("/{id}", func(r chi.Router) {
 					r.Get("/", promotion.RouterRead)
-					r.Post("/", promotion.RouterUpdate)
+					r.Put("/", promotion.RouterUpdate)
 					r.Delete("/", promotion.RouterDelete)
 				})
 
@@ -69,7 +69,7 @@ func Run() error {
 				//
 				r.Route("/{id}", func(r chi.Router) {
 					r.Get("/", order.RouterRead)
-					//	r.Post("/", order.RouterUpdate)
+					//	r.Put("/", order.RouterUpdate)
 					//	r.RouterDelete("/", order.RouterDelete)
 				})
 			})
@@ -80,7 +80,7 @@ func Run() error {
 				//
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", product.RouterRead)
-				//	r.Post("/", product.RouterUpdate)
+				//	r.Put("/", product.RouterUpdate)
 				//	r.RouterDelete("/", product.RouterDelete)
 				//})
 			})
@@ -91,7 +91,7 @@ func Run() error {
 				//
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", store.RouterRead)
-				//	r.Post("/", store.RouterUpdate)
+				//	r.Put("/", store.RouterUpdate)
 				//	r.RouterDelete("/", store.RouterDelete)
 				//})
 			})
@@ -104,7 +104,7 @@ func Run() error {
 				//
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", employee.RouterRead)
-				//	r.Post("/", employee.RouterUpdate)
+				//	r.Put("/", employee.RouterUpdate)
 				//	r.RouterDelete("/", employee.RouterDelete)
 				//})
 			})
@@ -115,7 +115,7 @@ func Run() error {
 				//
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", member.RouterRead)
-				//	r.Post("/", member.RouterUpdate)
+				//	r.Put("/", member.RouterUpdate)
 				//	r.RouterDelete("/", member.RouterDelete)
 				//})
 			})
