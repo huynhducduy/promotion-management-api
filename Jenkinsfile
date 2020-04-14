@@ -18,8 +18,8 @@ pipeline {
             }
         }
         stage('prepare to deploy') {
+            containers = sh(returnStdout: true, script: 'sudo docker ps -a -q --filter ancestor=swd391:latest --format="{{.ID}}"')
             steps {
-                containers = sh(returnStdout: true, script: 'sudo docker ps -a -q --filter ancestor=swd391:latest --format="{{.ID}}"')
                 sh 'sudo docker stop $containers'
                 sh 'sudo docker rm $containers'
             }
