@@ -21,4 +21,4 @@ EXPOSE 80
 ENTRYPOINT ["./promotion-management-api"]
 
 # sudo docker build -t swd391 .
-# sudo docker run -dit -p 80:80 swd391:latest
+# sudo docker run -dit -p 8081:80 swd391:latest
