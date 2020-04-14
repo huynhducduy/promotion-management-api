@@ -15,7 +15,7 @@ WORKDIR /root
 
 COPY --from=builder /root/promotion-management-api /root/promotion-management-api
 COPY .env .env
-COPY .firebase.json .firebase.json
+COPY firebase.json firebase.json
 
 EXPOSE 80
 
