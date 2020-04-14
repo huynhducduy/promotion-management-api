@@ -22,6 +22,7 @@ func Run() error {
 	config.ReadConfig()
 
 	db.OpenConnection()
+	auth.InitFirebase()
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -47,6 +48,8 @@ func Run() error {
 
 			r.Use(auth.AuthenticationMiddleware)
 
+			r.Get("/me", employee.RouterMe)
+
 			r.Route("/promotion", func(r chi.Router) {
 				r.Get("/", promotion.RouterList)
 				r.Post("/", promotion.RouterCreate)
@@ -66,7 +69,7 @@ func Run() error {
 
 				r.Route("/{id}", func(r chi.Router) {
 					r.Get("/", order.RouterRead)
-					//	r.Put("/", order.RouterUpdate)
+					r.Put("/", order.RouterUpdate)
 					r.Delete("/", order.RouterDelete)
 				})
 			})
@@ -74,7 +77,7 @@ func Run() error {
 			r.Route("/product", func(r chi.Router) {
 				r.Get("/", product.RouterList)
 				//r.Post("/", product.RouterCreate)
-				//
+
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", product.RouterRead)
 				//	r.Put("/", product.RouterUpdate)
@@ -85,7 +88,7 @@ func Run() error {
 			r.Route("/store", func(r chi.Router) {
 				r.Get("/", store.RouterList)
 				//r.Post("/", store.RouterCreate)
-				//
+
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", store.RouterRead)
 				//	r.Put("/", store.RouterUpdate)
@@ -96,7 +99,7 @@ func Run() error {
 			r.Route("/employee", func(r chi.Router) {
 				r.Get("/", employee.RouterList)
 				//r.Post("/", employee.RouterCreate)
-				//
+
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", employee.RouterRead)
 				//	r.Put("/", employee.RouterUpdate)
@@ -107,7 +110,7 @@ func Run() error {
 			r.Route("/member", func(r chi.Router) {
 				r.Get("/", member.RouterList)
 				//r.Post("/", member.RouterCreate)
-				//
+
 				//r.Route("/{id}", func(r chi.Router) {
 				//	r.Get("/", member.RouterRead)
 				//	r.Put("/", member.RouterUpdate)

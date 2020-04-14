@@ -13,6 +13,7 @@ type Config struct {
 	DB_PASS string
 	DB_NAME string
 	SECRET  string
+	FIREBASE_PRIVATEKEY string
 }
 
 var config Config

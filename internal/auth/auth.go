@@ -5,24 +5,29 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	firebase "firebase.google.com/go"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/option"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"promotion-management-api/internal/db"
 	"promotion-management-api/internal/employee"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"promotion-management-api/internal/config"
-	"promotion-management-api/internal/db"
 	"promotion-management-api/pkg/utils"
+	//"firebase.google.com/go/auth"
 )
 
 type Credential struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Token    string `json:"token"`
 }
+
 type Claims struct {
 	Id        int64
 	ExpiresAt int64
@@ -32,6 +37,7 @@ type Claims struct {
 type Token struct {
 	Token     string `json:"token"`
 	ExpiresAt int64  `json:"expires_at"`
+	Username  string `json:"username"`
 }
 
 func getToken(r *http.Request) (string, error) {
@@ -42,7 +48,7 @@ func getToken(r *http.Request) (string, error) {
 	}
 }
 
-func generateToken(id int64) Token {
+func generateToken(id int64, username string) Token {
 	expAt := time.Now().Unix() + 604800 // 1 week
 
 	payload := Claims{Id: id, ExpiresAt: expAt}
@@ -52,6 +58,7 @@ func generateToken(id int64) Token {
 	return Token{
 		Token:     tokenString,
 		ExpiresAt: expAt,
+		Username: username,
 	}
 }
 
@@ -71,6 +78,20 @@ func comparePasswords(hashed string, plain string) bool {
 		return false
 	}
 	return true
+}
+
+var app *firebase.App
+
+func InitFirebase() {
+
+	var err error
+
+	opt := option.WithCredentialsFile(config.GetConfig().FIREBASE_PRIVATEKEY)
+	config := &firebase.Config{ProjectID: "swd391"}
+	app, err = firebase.NewApp(context.Background(), config, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v", err)
+	}
 }
 
 func AuthenticationMiddleware(next http.Handler) http.Handler {
@@ -114,33 +135,73 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var credential Credential
 	json.Unmarshal(reqBody, &credential)
 
-	if credential.Username == "" || credential.Password == "" {
-		utils.ResponseMessage(w, http.StatusBadRequest, "Username and password must not be empty!")
-		return
+	if credential.Token != "" {
+
+		ctx := context.Background()
+
+		client, err := app.Auth(ctx)
+		if err != nil {
+			utils.ResponseInternalError(w, err)
+			return
+		}
+
+		token, err := client.VerifyIDToken(ctx, credential.Token)
+		if err != nil {
+			utils.ResponseInternalError(w, err)
+			return
+		}
+
+		log.Printf("Verified ID token: %v\n", token)
+
+		email := token.Firebase.Identities["email"].([]interface{})[0].(string)
+		var id int64
+		var username string
+
+		db := db.GetConnection()
+
+		results := db.QueryRow("SELECT `ID`, `Username` FROM `employee` where `Email` = ?", email)
+		err = results.Scan(&id, &username)
+		if err == sql.ErrNoRows {
+			utils.ResponseMessage(w, http.StatusNotFound, "Email not registered!")
+			return
+		} else if err != nil {
+			utils.ResponseInternalError(w, err)
+			return
+		}
+
+		userToken := generateToken(id, username)
+
+		utils.Response(w, http.StatusOK, userToken)
+
+	} else {
+		if credential.Username == "" || credential.Password == "" {
+			utils.ResponseMessage(w, http.StatusBadRequest, "Username and password must not be empty!")
+			return
+		}
+
+		var id int64
+		var pass string
+		db := db.GetConnection()
+
+		results := db.QueryRow("SELECT `ID`, `Password` FROM `employee` where `Username` = ?", credential.Username)
+		err = results.Scan(&id, &pass)
+		if err == sql.ErrNoRows {
+			utils.ResponseMessage(w, http.StatusNotFound, "Username and password is incorrect!")
+			return
+		} else if err != nil {
+			utils.ResponseInternalError(w, err)
+			return
+		}
+
+		if !comparePasswords(pass, credential.Password) {
+			utils.ResponseMessage(w, http.StatusNotFound, "Username and password is incorrect!")
+			return
+		}
+
+		token := generateToken(id, credential.Username)
+
+		utils.Response(w, http.StatusOK, token)
 	}
-
-	var id int64
-	var pass string
-	db := db.GetConnection()
-
-	results := db.QueryRow("SELECT `ID`, `Password` FROM `employee` where `username` = ?", credential.Username)
-	err = results.Scan(&id, &pass)
-	if err == sql.ErrNoRows {
-		utils.ResponseMessage(w, http.StatusNotFound, "Username and password is incorrect!")
-		return
-	} else if err != nil {
-		utils.ResponseInternalError(w, err)
-		return
-	}
-
-	if !comparePasswords(pass, credential.Password) {
-		utils.ResponseMessage(w, http.StatusNotFound, "Username and password is incorrect!")
-		return
-	}
-
-	token := generateToken(id)
-
-	utils.Response(w, http.StatusOK, token)
 }
 
 func GetPwd(w http.ResponseWriter, r *http.Request) {

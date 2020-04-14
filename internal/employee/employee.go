@@ -7,5 +7,6 @@ type Employee struct {
 	Name       *string `json:"name"`
 	Phone      *string `json:"phone"`
 	Address    *string `json:"address"`
-	JoinedDate *string `json:"joined_date,"`
+	JoinedDate *string `json:"joined_date"`
+	Email	   *string `json:"email"`
 }

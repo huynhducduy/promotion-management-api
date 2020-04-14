@@ -60,6 +60,22 @@ func RouterRead(w http.ResponseWriter, r *http.Request) {
 	utils.Response(w, http.StatusOK, order)
 }
 
+func RouterUpdate(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		utils.ResponseMessage(w, http.StatusBadRequest, "Id must be an integer!")
+		return
+	}
+
+	order, err := Read(id)
+	if err != nil {
+		utils.ResponseInternalError(w, err)
+		return
+	}
+
+	utils.Response(w, http.StatusOK, order)
+}
+
 func RouterDelete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {

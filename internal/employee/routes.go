@@ -14,3 +14,8 @@ func RouterList(w http.ResponseWriter, r *http.Request) {
 
 	utils.Response(w, 200, data)
 }
+
+func RouterMe(w http.ResponseWriter, r *http.Request) {
+	employee := r.Context().Value("employee").(*Employee)
+	utils.Response(w, 200, employee)
+}
