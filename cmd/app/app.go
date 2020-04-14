@@ -39,7 +39,7 @@ func Run() error {
 	})
 	r.Use(c.Handler)
 
-	r.Route("/api/v1", func(r chi.Router) {
+	r.Route("/v1", func(r chi.Router) {
 		r.Get("/", auth.GetPwd)
 		r.Post("/login", auth.Login)
 
