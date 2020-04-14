@@ -118,10 +118,14 @@ func RouterApplicable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	memberId, err := strconv.ParseInt(r.URL.Query().Get("member_id"), 10, 64)
-	if err != nil {
-		utils.ResponseMessage(w, http.StatusBadRequest, "Member id must be an integer!")
-		return
+	var memberId int64 = 0
+
+	if r.URL.Query().Get("member_id") != "" {
+		memberId, err = strconv.ParseInt(r.URL.Query().Get("member_id"), 10, 64)
+		if err != nil {
+			utils.ResponseMessage(w, http.StatusBadRequest, "Member id must be an integer!")
+			return
+		}
 	}
 
 	paymentType := r.URL.Query().Get("payment_type")
