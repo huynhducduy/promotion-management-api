@@ -13,7 +13,7 @@ FROM alpine
 
 WORKDIR /root
 
-COPY --from=builder /root/src/go/promotion-management-api /root/src/go/promotion-management-api
+COPY --from=builder /root/promotion-management-api /root/promotion-management-api
 COPY .env .env
 COPY .firebase.json .firebase.json
 
