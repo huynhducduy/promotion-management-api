@@ -20,7 +20,8 @@ pipeline {
         }
         stage('prepare to deploy') {
             steps {
-                sh 'sudo docker rm \$(sudo docker stop \$(sudo docker ps -a -q --filter ancestor=swd391:latest --format="{{.ID}}") || true) || true'
+                sh 'sudo docker stop \$(sudo docker ps -a -q --filter ancestor=swd391:latest --format="{{.ID}}") || true'
+                sh 'sudo docker rm \$(sudo docker ps -a -q --filter ancestor=swd391:latest --format="{{.ID}}") || true'
             }
         }
         stage('deploy') {
