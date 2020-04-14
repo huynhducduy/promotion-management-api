@@ -332,7 +332,9 @@ func Applicable(storeId int64, memberId int64, paymentType string, orderType str
 
 	now := time.Now()
 	hour := now.Hour()
-	dayOfWeek := int(now.Weekday())
+	dayOfWeek := int(now.Weekday())-1
+
+	utils.Logg(dayOfWeek)
 
 	queryString = ""
 	stuffs = make([]interface{}, 0)
@@ -373,6 +375,9 @@ func Applicable(storeId int64, memberId int64, paymentType string, orderType str
 
 	// Check membership -----------------------------------------------------------------------------===----------------
 
+	bd := false
+	pt := false
+
 	if memberId != 0 {
 		var birthdate time.Time
 		var point int64
@@ -385,8 +390,8 @@ func Applicable(storeId int64, memberId int64, paymentType string, orderType str
 			return nil, err
 		}
 
-		bd := false
-		pt := false
+		bd = false
+		pt = false
 
 		if birthdate.Day() == now.Day() && birthdate.Month() == now.Month() {
 			bd = true
@@ -395,49 +400,51 @@ func Applicable(storeId int64, memberId int64, paymentType string, orderType str
 		if point >= 10 {
 			pt = true
 		}
+	}
 
-		queryString = ""
-		stuffs = make([]interface{}, 0)
+	queryString = ""
+	stuffs = make([]interface{}, 0)
 
-		stuffs = append(stuffs, promoIds...)
-		queryString = "SELECT DISTINCT `PromotionID` FROM `membership_constraint` WHERE `PromotionID` IN (?"
+	stuffs = append(stuffs, promoIds...)
+	queryString = "SELECT DISTINCT `PromotionID` FROM `membership_constraint` WHERE `PromotionID` IN (?"
 
-		for i := 1; i <= len(promoIds)-1; i++ {
-			queryString += ",?"
-		}
+	for i := 1; i <= len(promoIds)-1; i++ {
+		queryString += ",?"
+	}
 
-		queryString += ")"
+	queryString += ")"
 
-		if bd && pt {
-			queryString += " AND `Type` IN (\"Birthday\", \"Point\", \"0\")"
-		} else if bd {
-			queryString += " AND `Type` IN (\"Birthday\", \"0\")"
-		} else if pt {
-			queryString += " AND `Type` IN (\"Point\", \"0\")"
-		}
+	if bd && pt {
+		queryString += " AND `Type` IN (\"Birthday\", \"Point\", \"0\")"
+	} else if bd {
+		queryString += " AND `Type` IN (\"Birthday\", \"0\")"
+	} else if pt {
+		queryString += " AND `Type` IN (\"Point\", \"0\")"
+	} else {
+		queryString += " AND `Type` =\"0\""
+	}
 
-		results, err = db.Query(queryString, stuffs...)
+	results, err = db.Query(queryString, stuffs...)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	promoIds = make([]interface{}, 0)
+
+	for results.Next() {
+		var promoId string
+		err = results.Scan(&promoId)
 		if err != nil {
 			return nil, err
 		}
-		defer results.Close()
+		promoIds = append(promoIds, promoId)
+	}
 
-		promoIds = make([]interface{}, 0)
-
-		for results.Next() {
-			var promoId string
-			err = results.Scan(&promoId)
-			if err != nil {
-				return nil, err
-			}
-			promoIds = append(promoIds, promoId)
-		}
-
-		utils.Logg("After membership")
-		utils.Logg(promoIds)
-		if len(promoIds) == 0 {
-			return promotions, nil
-		}
+	utils.Logg("After membership")
+	utils.Logg(promoIds)
+	if len(promoIds) == 0 {
+		return promotions, nil
 	}
 
 	// Get promotion -----------------------------------------------------------------------------===-------------------
