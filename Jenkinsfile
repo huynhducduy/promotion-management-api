@@ -8,7 +8,7 @@ pipeline {
         }
         stage('build') {
             steps {
-                sh 'sudo cp ~/promotion-management-api.env .env'
+                sh 'sudo cp /home/duuuuuuuuy/promotion-management-api.env .env'
                 sh 'sudo docker build -t swd391 .'
             }
         }
