@@ -1,8 +1,8 @@
 FROM golang:alpine as builder
 RUN apk add ca-certificates git
 
-RUN mkdir -p /root/src/go
-WORKDIR /root/src/go
+RUN mkdir -p /root
+WORKDIR /root
 
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
@@ -11,10 +11,11 @@ FROM alpine
 
 #RUN apk add ca-certificates rsync openssh
 
-WORKDIR /root/src/go
+WORKDIR /root
 
 COPY --from=builder /root/src/go/promotion-management-api /root/src/go/promotion-management-api
 COPY .env .env
+COPY .firebase.json .firebase.json
 
 EXPOSE 80
 
