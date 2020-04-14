@@ -17,8 +17,8 @@ type Promotion struct {
 
 type Time struct {
 	Type      *string `json:"type"`
-	StartTime *string `json:"start_time"`
-	EndTime   *string `json:"end_time"`
+	StartTime *int64  `json:"start_time"`
+	EndTime   *int64  `json:"end_time"`
 }
 
 type PromotionExtra struct {
